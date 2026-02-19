@@ -29,8 +29,8 @@ class Settings(BaseSettings):
 
     # ── Embedding ───────────────────────────────────────────────────
     EMBEDDING_MODEL: str = Field(
-        default="sentence-transformers/all-MiniLM-L6-v2",
-        description="HuggingFace sentence-transformer model for embeddings",
+        default="BAAI/bge-small-en-v1.5",
+        description="FastEmbed model for embeddings",
     )
 
     # ── RAG Tuning ──────────────────────────────────────────────────
