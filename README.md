@@ -12,10 +12,6 @@
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
 </p>
 
-<p align="center">
-  <strong>🚀 Live Demo: <a href="https://nyaya-ai-liart.vercel.app/">https://nyaya-ai-liart.vercel.app/</a></strong>
-</p>
-
 ---
 
 ## 🎯 Problem Statement

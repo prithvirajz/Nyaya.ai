@@ -21,7 +21,7 @@ class Settings(BaseSettings):
         description="OpenRouter chat completions endpoint",
     )
     MODEL_NAME: str = Field(
-        default="mistralai/mistral-small-3.1-24b-instruct:free",
+        default="mistralai/mistral-7b-instruct",
         description="LLM model identifier on OpenRouter",
     )
     LLM_TEMPERATURE: float = Field(default=0.2, ge=0.0, le=1.0)
@@ -29,8 +29,8 @@ class Settings(BaseSettings):
 
     # ── Embedding ───────────────────────────────────────────────────
     EMBEDDING_MODEL: str = Field(
-        default="BAAI/bge-small-en-v1.5",
-        description="FastEmbed model for embeddings",
+        default="sentence-transformers/all-MiniLM-L6-v2",
+        description="HuggingFace sentence-transformer model for embeddings",
     )
 
     # ── RAG Tuning ──────────────────────────────────────────────────

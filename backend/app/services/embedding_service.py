@@ -11,8 +11,7 @@ import threading
 from typing import List
 
 from loguru import logger
-from loguru import logger
-from fastembed import TextEmbedding
+from sentence_transformers import SentenceTransformer
 
 from app.config import settings
 
@@ -35,14 +34,13 @@ class EmbeddingService:
         return cls._instance
 
     @property
-    def model(self) -> TextEmbedding:
+    def model(self) -> SentenceTransformer:
         """Lazy-load the embedding model on first access."""
         if self._model is None:
             logger.info(
                 "Loading embedding model: {model}", model=settings.EMBEDDING_MODEL
             )
-            # threads=1 to reduce memory usage on Railway
-            self._model = TextEmbedding(model_name=settings.EMBEDDING_MODEL, threads=1)
+            self._model = SentenceTransformer(settings.EMBEDDING_MODEL)
             logger.info("Embedding model loaded successfully.")
         return self._model
 
@@ -58,10 +56,13 @@ class EmbeddingService:
         """
         if not texts:
             return []
-            
-        # FastEmbed returns a generator of vectors, so we convert to list
-        embeddings_generator = self.model.embed(texts)
-        return [list(vec) for vec in embeddings_generator]
+        embeddings = self.model.encode(
+            texts,
+            show_progress_bar=False,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+        )
+        return embeddings.tolist()
 
     def embed_query(self, query: str) -> List[float]:
         """

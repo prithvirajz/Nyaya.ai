@@ -12,9 +12,8 @@ env/
 dist/
 build/
 
-# Environment — catch ALL .env files everywhere
-**/.env
-**/.env.*
+# Environment
+.env
 *.env.local
 
 # Data (generated)
