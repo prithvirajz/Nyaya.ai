@@ -13,7 +13,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Generator, Iterable
 
 import faiss
 import numpy as np
@@ -145,13 +145,25 @@ def chunk_documents(
     return all_texts, all_metadatas
 
 
+def batch_iterate(iterable: Iterable, batch_size: int = 32) -> Generator[List, None, None]:
+    """Yield batches from an iterable."""
+    batch = []
+    for item in iterable:
+        batch.append(item)
+        if len(batch) >= batch_size:
+            yield batch
+            batch = []
+    if batch:
+        yield batch
+
+
 def build_faiss_index(
     texts: List[str],
     metadatas: List[Dict[str, str]],
     index_path: str | None = None,
 ) -> None:
     """
-    Generate embeddings and build a FAISS index, persisting it to disk.
+    Generate embeddings and build a FAISS index in batches, persisting it to disk.
 
     Saves:
         - index.faiss   – the FAISS flat index
@@ -163,13 +175,32 @@ def build_faiss_index(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info("Generating embeddings for {n} chunks...", n=len(texts))
-    embeddings = embedding_service.embed_texts(texts)
-    embeddings_np = np.array(embeddings, dtype="float32")
 
-    # Build FAISS index (Flat L2 — exact search, fine for < 100k chunks)
-    dimension = embeddings_np.shape[1]
-    index = faiss.IndexFlatL2(dimension)
-    index.add(embeddings_np)
+    # Initialize index (dim=384 for all-MiniLM-L6-v2 / bge-small-en-v1.5)
+    # We'll detect dimension from the first batch
+    index = None
+    
+    total_processed = 0
+    batch_size = 32
+
+    for batch_texts in batch_iterate(texts, batch_size):
+        batch_embeddings = embedding_service.embed_texts(batch_texts)
+        if not batch_embeddings:
+            continue
+            
+        embeddings_np = np.array(batch_embeddings, dtype="float32")
+        
+        if index is None:
+            dimension = embeddings_np.shape[1]
+            index = faiss.IndexFlatL2(dimension)
+            
+        index.add(embeddings_np)
+        total_processed += len(batch_texts)
+        logger.debug(f"Processed {total_processed}/{len(texts)} chunks...")
+
+    if index is None:
+        logger.warning("No embeddings generated. Index not created.")
+        return
 
     # Persist
     faiss.write_index(index, str(out_dir / "index.faiss"))
@@ -180,7 +211,7 @@ def build_faiss_index(
         "FAISS index saved to {path} ({n} vectors, dim={d})",
         path=index_path,
         n=index.ntotal,
-        d=dimension,
+        d=index.d,
     )
 
 

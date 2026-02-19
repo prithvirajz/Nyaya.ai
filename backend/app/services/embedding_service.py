@@ -41,8 +41,8 @@ class EmbeddingService:
             logger.info(
                 "Loading embedding model: {model}", model=settings.EMBEDDING_MODEL
             )
-            # threads=None lets FastEmbed use all available CPU cores
-            self._model = TextEmbedding(model_name=settings.EMBEDDING_MODEL, threads=None)
+            # threads=1 to reduce memory usage on Railway
+            self._model = TextEmbedding(model_name=settings.EMBEDDING_MODEL, threads=1)
             logger.info("Embedding model loaded successfully.")
         return self._model
 
