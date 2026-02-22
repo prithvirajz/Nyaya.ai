@@ -129,7 +129,7 @@ pip install -r requirements.txt
 copy .env.example .env
 # Edit .env and add your OPENROUTER_API_KEY
 
-# Add legal PDFs to data/pdfs/ (follow naming convention in data/pdfs/README.md)
+# Add legal PDF to data/pdfs/ (follow naming convention in data/pdfs/README.md)
 
 # Run ingestion pipeline
 python -m app.rag.ingest
