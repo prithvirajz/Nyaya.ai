@@ -146,7 +146,7 @@ cd frontend
 # Install dependencies
 npm install
 
-# Start dev server (proxies to localhost:8000)
+
 npm run dev
 ```
 
